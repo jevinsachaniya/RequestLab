@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <!-- Flask Outline -->
+  <path
+    d="M26 12 H38 M28 12 V24 L14 50 C12 54 15 58 19 58 H45 C49 58 52 54 50 50 L36 24 V12"
+    stroke="#ffffff"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- Paper Airplane inside -->
+  <polygon points="41,36 21,46 28,42" fill="#5eead4"/>
+  <polygon points="41,36 28,42 32,50" fill="#14b8a6"/>
+  <polygon points="28,42 32,50 31,44" fill="#0f766e"/>
+</svg>
+
