@@ -35,7 +35,7 @@ def create_application() -> FastAPI:
     # Allows frontend (e.g. Vue on port 5173) to communicate with this backend
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=["https://requestlab-main.netlify.app/"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
