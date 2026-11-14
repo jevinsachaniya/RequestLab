@@ -2,8 +2,8 @@ import { reactive, computed } from "vue";
 import { api } from "@/api/client";
 
 export const store = reactive({
-  // Theme State
-  theme: localStorage.getItem("api_sentinel_theme") || "dark",
+  // Theme State (Dark Theme Only)
+  theme: "dark",
 
   // Navigation / View State
   activeView: "workspace", // "workspace" | "dashboard" | "history"

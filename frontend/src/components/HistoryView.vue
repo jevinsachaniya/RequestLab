@@ -105,9 +105,9 @@
 
     <!-- History Data Table Container -->
     <div class="history-table-card rounded border">
-      <div v-if="filteredHistory.length === 0" class="text-center pa-6 text-secondary">
+      <div v-if="filteredHistory.length === 0" class="text-center pa-6">
         <v-icon size="28" color="grey" class="mb-2">mdi-database-search-outline</v-icon>
-        <div class="text-caption font-weight-bold mb-1">No execution records found</div>
+        <div class="text-caption font-weight-bold text-primary mb-1">No execution records found</div>
         <div class="text-caption text-muted">
           {{ isAuthenticated ? 'Try adjusting your filters or execute requests in the workspace studio.' : 'Sign in to record execution history.' }}
         </div>
@@ -358,7 +358,8 @@ function formatDateTime(isoStr) {
 
 .dev-primary-btn {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--primary-fg, #042416);
+  font-weight: 700;
   border: none;
   border-radius: 4px;
   cursor: pointer;

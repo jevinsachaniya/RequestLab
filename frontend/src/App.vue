@@ -48,16 +48,16 @@
               color="primary"
               variant="outlined"
             >
-              <v-btn value="request" size="small" class="px-3">
-                <v-icon start size="14">mdi-console-line</v-icon>
-                Request
+              <v-btn value="request" size="small" class="mobile-toggle-btn px-3">
+                <v-icon size="14" class="mr-1.5">mdi-console-line</v-icon>
+                <span>Request</span>
               </v-btn>
-              <v-btn value="response" size="small" class="px-3 d-flex align-center">
-                <v-icon start size="14">mdi-code-braces</v-icon>
+              <v-btn value="response" size="small" class="mobile-toggle-btn px-3">
+                <v-icon size="14" class="mr-1.5">mdi-code-braces</v-icon>
                 <span>Response</span>
                 <span
                   v-if="store.lastResponse?.status_code"
-                  class="mobile-status-dot ml-1.5"
+                  class="mobile-status-dot ml-1"
                   :style="{ backgroundColor: getStatusColor(store.lastResponse.status_code) }"
                 ></span>
               </v-btn>
@@ -160,8 +160,8 @@ function handleGlobalKeydown(e) {
 onMounted(async () => {
   window.addEventListener("keydown", handleGlobalKeydown);
 
-  const savedTheme = localStorage.getItem("api_sentinel_theme") || "dark";
-  document.documentElement.setAttribute("data-theme", savedTheme);
+  document.documentElement.setAttribute("data-theme", "dark");
+  localStorage.setItem("api_sentinel_theme", "dark");
 
   if (store.token) {
     const isAuth = await checkAuth();
@@ -222,30 +222,31 @@ function getStatusColor(code) {
 [data-theme="dark"],
 .v-theme--dark {
   --bg-app: #181818;
-  --bg-sidebar: #212121;
-  --bg-header: #212121;
+  --bg-sidebar: #181818;
+  --bg-header: #1c1c1c;
   --bg-workspace-req: #1e1e1e;
-  --bg-workspace-res: #181818;
-  --bg-surface: #252526;
-  --bg-surface-elevated: #2d2d2d;
-  --bg-terminal: #141414;
-  --bg-code-editor: #181818;
-  --bg-input: #282828;
-  --bg-omni: #252526;
-  --bg-dialog: #252526;
-  --bg-hover: #2f2f2f;
+  --bg-workspace-res: #1a1a1a;
+  --bg-surface: #222222;
+  --bg-surface-elevated: #282828;
+  --bg-terminal: #161616;
+  --bg-code-editor: #161616;
+  --bg-input: #242424;
+  --bg-omni: #1e1e1e;
+  --bg-dialog: #242424;
+  --bg-hover: #2c2c2c;
   --border-color: #333333;
-  --border-color-subtle: #2b2b2b;
-  --text-primary: #ededed;
-  --text-secondary: #aaaaaa;
-  --text-muted: #757575;
-  --text-terminal: #e1e1e1;
-  --text-code: #58a6ff;
-  --primary: #ff6c37; /* Authentic developer action accent (Postman orange / clean energetic) */
-  --primary-hover: #e05a28;
-  --primary-bg: rgba(255, 108, 55, 0.12);
-  --scrollbar-thumb: #3e3e3e;
-  --scrollbar-track: #1e1e1e;
+  --border-color-subtle: #282828;
+  --text-primary: #ffffff;
+  --text-secondary: #9aa0a6;
+  --text-muted: #6e7681;
+  --text-terminal: #e6edf3;
+  --text-code: #79c0ff;
+  --primary: #0b5fff; /* Authentic Postman Electric Blue */
+  --primary-hover: #0056e0;
+  --primary-bg: rgba(11, 95, 255, 0.12);
+  --primary-fg: #ffffff;
+  --scrollbar-thumb: #3c3c3c;
+  --scrollbar-track: #181818;
 }
 
 [data-theme="light"],
@@ -270,9 +271,10 @@ function getStatusColor(code) {
   --text-muted: #8c8c8c;
   --text-terminal: #24292f;
   --text-code: #0969da;
-  --primary: #ff6c37;
-  --primary-hover: #e05a28;
-  --primary-bg: rgba(255, 108, 55, 0.1);
+  --primary: #0b5fff;
+  --primary-hover: #0056e0;
+  --primary-bg: rgba(11, 95, 255, 0.1);
+  --primary-fg: #ffffff;
   --scrollbar-thumb: #c1c1c1;
   --scrollbar-track: #f1f1f1;
 }
@@ -288,6 +290,18 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-primary-color {
+  color: var(--text-primary) !important;
 }
 
 .api-sentinel-app {
@@ -348,12 +362,29 @@ html, body {
   border-color: var(--border-color) !important;
 }
 
+.mobile-toggle-btn {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-weight: 600 !important;
+  min-width: 90px !important;
+}
+
+.mobile-toggle-btn :deep(.v-btn__content) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  position: relative !important;
+  width: auto !important;
+}
+
 .mobile-status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
+  margin-left: 3px;
 }
 
 .toast-snackbar :deep(.v-snackbar__wrapper) {

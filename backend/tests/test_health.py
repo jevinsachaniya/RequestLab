@@ -1,12 +1,9 @@
 """Tests for root and health check endpoints."""
 
 from fastapi.testclient import TestClient
-from app.main import app
-
-client = TestClient(app)
 
 
-def test_root_endpoint():
+def test_root_endpoint(client: TestClient):
     """Verify the root endpoint responds with status 200 and expected metadata."""
     response = client.get("/")
     assert response.status_code == 200
@@ -16,7 +13,7 @@ def test_root_endpoint():
     assert data["health"] == "/api/v1/health"
 
 
-def test_health_check_endpoint():
+def test_health_check_endpoint(client: TestClient):
     """Verify the /api/v1/health endpoint responds with status 200 and healthy status."""
     response = client.get("/api/v1/health")
     assert response.status_code == 200
@@ -27,7 +24,7 @@ def test_health_check_endpoint():
     assert "environment" in data
 
 
-def test_swagger_documentation_accessible():
+def test_swagger_documentation_accessible(client: TestClient):
     """Verify that Swagger UI (/docs) and OpenAPI schema (/api/v1/openapi.json) are accessible."""
     docs_response = client.get("/docs")
     assert docs_response.status_code == 200
@@ -38,5 +35,6 @@ def test_swagger_documentation_accessible():
     openapi_data = openapi_response.json()
     assert openapi_data["info"]["title"] == "RequestLab"
     assert "/api/v1/health" in openapi_data["paths"]
+
 
 

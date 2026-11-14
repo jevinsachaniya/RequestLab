@@ -1,6 +1,6 @@
 <template>
-  <div class="request-console pa-3 d-flex flex-column" style="min-height: 0;">
-    <!-- Top Action Bar: Request Title & Save -->
+  <div class="request-console px-3 py-2 d-flex flex-column" style="min-height: 0;">
+    <!-- Top Action Bar: Request Title & Save / cURL -->
     <div class="d-flex align-center justify-space-between mb-2 flex-wrap gap-2 flex-shrink-0">
       <div class="d-flex align-center flex-grow-1 mr-2" style="min-width: 0;">
         <input
@@ -16,13 +16,24 @@
         </span>
       </div>
 
-      <div class="d-flex align-center gap-2">
+      <div class="request-top-actions d-flex align-center">
         <button
           type="button"
-          class="btn-secondary text-caption font-weight-medium d-flex align-center px-3 py-1"
+          class="action-btn-subtle"
+          title="Copy request as cURL command"
+          @click="copyCurlCommand"
+        >
+          <v-icon size="14" class="action-btn-icon">mdi-console-line</v-icon>
+          <span>Copy cURL</span>
+        </button>
+
+        <button
+          type="button"
+          class="action-btn-subtle"
+          title="Save Request into collection (Ctrl+S)"
           @click="emit('open-save-dialog')"
         >
-          <v-icon size="14" class="mr-1">mdi-content-save-outline</v-icon>
+          <v-icon size="14" class="action-btn-icon">mdi-content-save-outline</v-icon>
           <span>Save</span>
         </button>
       </div>
@@ -71,8 +82,8 @@
       </button>
     </div>
 
-    <!-- Authentic Postman Style Tabs -->
-    <div class="tab-bar border-b d-flex align-center mb-2 flex-shrink-0">
+    <!-- Authentic Postman Style Tabs (Desktop / Tablet) -->
+    <div class="tab-bar border-b d-none d-sm-flex align-center mb-2 flex-shrink-0">
       <button
         type="button"
         :class="['tab-item', { active: activeTab === 'params' }]"
@@ -119,6 +130,20 @@
           {{ store.currentRequest.assertions.length }}
         </span>
       </button>
+    </div>
+
+    <!-- Mobile Selectable Tab Dropdown (Mobile Only) -->
+    <div class="mobile-tab-bar border-b d-flex d-sm-none align-center px-1 py-1 mb-2 flex-shrink-0">
+      <div class="d-flex align-center w-100">
+        <span class="text-caption text-muted mr-2 font-weight-medium">Tab:</span>
+        <select v-model="activeTab" class="mobile-tab-select flex-grow-1 font-weight-medium">
+          <option value="params">Params {{ validParamsCount > 0 ? `(${validParamsCount})` : '' }}</option>
+          <option value="auth">Authorization {{ store.currentRequest.auth.type !== 'none' ? '●' : '' }}</option>
+          <option value="headers">Headers {{ validHeadersCount > 0 ? `(${validHeadersCount})` : '' }}</option>
+          <option value="body">Body {{ hasBodyContent ? '●' : '' }}</option>
+          <option value="tests">Tests {{ store.currentRequest.assertions?.length > 0 ? `(${store.currentRequest.assertions.length})` : '' }}</option>
+        </select>
+      </div>
     </div>
 
     <!-- Scrollable Tab Content Container -->
@@ -501,6 +526,40 @@ function prettifyJson() {
   }
 }
 
+function copyCurlCommand() {
+  if (!store.currentRequest.url) {
+    showToast("Please enter a URL first", "warning");
+    return;
+  }
+  let cmd = `curl -X ${store.currentRequest.method} "${store.currentRequest.url}"`;
+
+  // Headers
+  for (const h of store.currentRequest.headersList) {
+    if (h.enabled && h.key.trim()) {
+      cmd += ` \\\n  -H "${h.key.trim()}: ${h.value}"`;
+    }
+  }
+
+  // Authorization headers
+  const auth = store.currentRequest.auth;
+  if (auth.type === "bearer" && auth.bearerToken) {
+    cmd += ` \\\n  -H "Authorization: Bearer ${auth.bearerToken.trim()}"`;
+  } else if (auth.type === "basic" && (auth.basicUser || auth.basicPass)) {
+    const creds = btoa(`${auth.basicUser}:${auth.basicPass}`);
+    cmd += ` \\\n  -H "Authorization: Basic ${creds}"`;
+  } else if (auth.type === "apikey" && auth.apiKeyName && auth.apiKeyValue && auth.apiKeyLocation === "header") {
+    cmd += ` \\\n  -H "${auth.apiKeyName.trim()}: ${auth.apiKeyValue}"`;
+  }
+
+  // Body
+  if (store.currentRequest.body?.trim() && ["POST", "PUT", "PATCH", "DELETE"].includes(store.currentRequest.method)) {
+    cmd += ` \\\n  -d '${store.currentRequest.body.trim().replace(/'/g, "'\\''")}'`;
+  }
+
+  navigator.clipboard.writeText(cmd);
+  showToast("cURL command copied to clipboard!", "success");
+}
+
 function onParamInput(index) {
   if (index === store.currentRequest.paramsList.length - 1 && store.currentRequest.paramsList[index].key) {
     addParamRow();
@@ -697,24 +756,51 @@ async function handleSendRequest() {
   border-radius: 3px;
 }
 
-.btn-secondary {
+.request-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 5px;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
 }
 
-.btn-secondary:hover {
+.action-btn-subtle:hover {
   background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-color-subtle);
 }
 
-/* Postman Omni Request Bar */
+.action-btn-icon {
+  margin-right: 6px;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.action-btn-subtle:hover .action-btn-icon {
+  color: var(--text-primary);
+}
+
+/* Postman Omni Request Bar (Compact Point 6) */
 .omni-request-bar {
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  height: 36px;
+  height: 34px;
 }
 
 .method-select {
@@ -725,6 +811,7 @@ async function handleSendRequest() {
   height: 100%;
   outline: none;
   font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -750,12 +837,15 @@ async function handleSendRequest() {
 
 .send-btn {
   background: var(--primary);
-  color: white;
+  color: #ffffff;
+  font-weight: 600;
   border: none;
   height: 100%;
-  border-radius: 0 3px 3px 0;
+  padding: 0 18px;
+  border-radius: 0 4px 4px 0;
   cursor: pointer;
   font-size: 0.82rem;
+  transition: background 0.15s ease;
 }
 
 .send-btn:hover {
@@ -763,14 +853,14 @@ async function handleSendRequest() {
 }
 
 .shortcut-hint {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   opacity: 0.8;
 }
 
-/* Horizontal Tabs (Underline Active) */
+/* Horizontal Tabs (Compact Point 6) */
 .tab-bar {
   border-color: var(--border-color) !important;
-  height: 34px;
+  height: 30px;
   overflow-x: auto;
   white-space: nowrap;
   scrollbar-width: none;
@@ -781,20 +871,45 @@ async function handleSendRequest() {
   display: none;
 }
 
+.mobile-tab-bar {
+  border-color: var(--border-color) !important;
+}
+
+.mobile-tab-select {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  padding: 4px 24px 4px 8px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239aa0a6'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 15px;
+}
+
+.mobile-tab-select:focus {
+  border-color: var(--primary);
+}
+
 .tab-item {
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 500;
-  padding: 0 12px;
+  padding: 0 10px;
   height: 100%;
   cursor: pointer;
   white-space: nowrap !important;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
+  transition: all 0.15s ease;
 }
 
 .table-responsive-wrapper {
@@ -814,11 +929,11 @@ async function handleSendRequest() {
 }
 
 .badge-count {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   background: var(--bg-hover);
   border: 1px solid var(--border-color);
-  padding: 0 5px;
-  border-radius: 9px;
+  padding: 0 4px;
+  border-radius: 8px;
   color: var(--text-secondary);
 }
 
@@ -828,20 +943,20 @@ async function handleSendRequest() {
 }
 
 .badge-dot.green {
-  color: #10b981;
+  color: #00dc82;
 }
 
-/* Spreadsheet Grid Table */
+/* Spreadsheet Grid Table (Compact Point 6) */
 .grid-table {
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
 }
 
 .grid-table th {
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-color);
-  padding: 4px 8px;
-  font-size: 0.7rem;
+  padding: 3px 8px;
+  font-size: 0.68rem;
   color: var(--text-secondary);
   text-align: left;
 }
@@ -851,14 +966,19 @@ async function handleSendRequest() {
   padding: 0;
 }
 
+.grid-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
 .grid-input {
   background: transparent;
   border: none;
   outline: none;
   width: 100%;
-  padding: 6px 8px;
+  padding: 4px 8px;
   color: var(--text-primary);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  height: 28px;
 }
 
 .native-chk {
@@ -894,50 +1014,24 @@ async function handleSendRequest() {
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 3px 6px;
   color: var(--text-primary);
   outline: none;
+  font-size: 0.76rem;
 }
 
 .field-input {
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 5px 8px;
+  padding: 4px 6px;
+  font-size: 0.76rem;
   color: var(--text-primary);
-  font-size: 0.8rem;
   outline: none;
 }
 
 .field-input:focus {
   border-color: var(--primary);
-}
-
-/* Code Editor */
-.code-textarea {
-  background: var(--bg-terminal);
-  border: 1px solid var(--border-color);
-  color: var(--text-terminal);
-  font-size: 0.82rem;
-  line-height: 1.5;
-  outline: none;
-  resize: none;
-}
-
-.status-tag {
-  font-size: 0.7rem;
-  padding: 1px 6px;
-  border-radius: 3px;
-}
-
-.status-tag.valid {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-}
-
-.status-tag.invalid {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
 }
 
 .assertion-row {

@@ -311,7 +311,8 @@ async function handleSubmit() {
 
 .dev-primary-btn {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--primary-fg, #042416);
+  font-weight: 700;
   border: none;
   border-radius: 4px;
   cursor: pointer;

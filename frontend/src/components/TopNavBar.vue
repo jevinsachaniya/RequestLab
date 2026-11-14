@@ -1,11 +1,11 @@
 <template>
-  <v-app-bar :height="52" flat class="top-nav-bar" :order="-1">
+  <v-app-bar :height="50" flat class="top-nav-bar" :order="-1">
     <div class="d-flex align-center w-100 h-100 px-3 px-md-4">
-      <!-- Left: Logo & Workspace Dropdown (Sidebar toggle removed from first position) -->
+      <!-- Left: Logo & Workspace Dropdown -->
       <div class="d-flex align-center flex-shrink-0">
-        <!-- Brand Logo (Front & Center) -->
+        <!-- Brand Logo -->
         <div class="d-flex align-center cursor-pointer mr-3 brand-wrap" @click="store.activeView = 'workspace'">
-          <RequestLabLogo :size="28" />
+          <RequestLabLogo :size="26" />
         </div>
 
         <!-- Vertical Divider -->
@@ -13,49 +13,22 @@
 
         <!-- Workspace Selector Chip -->
         <div class="workspace-chip d-none d-md-flex align-center rounded">
+          <v-icon size="14" class="mr-1.5 text-muted">mdi-account-group-outline</v-icon>
           <span class="text-caption font-weight-medium text-truncate" style="max-width: 160px;">
             {{ isAuthenticated ? `${store.user?.email.split('@')[0]}'s Workspace` : 'Default Workspace' }}
           </span>
-          <v-icon size="14" class="ml-2 text-secondary">mdi-chevron-down</v-icon>
+          <v-icon size="14" class="ml-1.5 text-secondary">mdi-chevron-down</v-icon>
         </div>
       </div>
 
-      <!-- Center: Navigation Tool Tabs -->
-      <div class="nav-links d-none d-sm-flex align-center ml-3 ml-md-4">
-        <button
-          type="button"
-          :class="['nav-link-item', { active: store.activeView === 'workspace' }]"
-          @click="store.activeView = 'workspace'"
-        >
-          Workspace
-        </button>
-        <button
-          type="button"
-          :class="['nav-link-item', { active: store.activeView === 'dashboard' }]"
-          @click="store.activeView = 'dashboard'"
-        >
-          Dashboard
-        </button>
-        <button
-          type="button"
-          :class="['nav-link-item', { active: store.activeView === 'history' }]"
-          @click="handleHistoryClick"
-        >
-          History
-        </button>
-      </div>
-
-      <div class="flex-grow-1"></div>
-
-      <!-- Right: Search, Sidebar Toggle, Theme & Auth Controls -->
-      <div class="right-controls-group d-flex align-center flex-shrink-0">
-        <!-- Search Box -->
-        <div class="nav-search-wrap d-none d-lg-flex align-center px-3 mr-1">
+      <!-- Center: Postman-style Rounded Pill Search Bar -->
+      <div class="center-search-section flex-grow-1 d-flex justify-center px-4">
+        <div class="nav-search-wrap d-none d-sm-flex align-center px-3">
           <v-icon size="14" class="text-muted mr-2">mdi-magnify</v-icon>
           <input
             v-model="store.searchFilter"
             type="text"
-            placeholder="Filter requests..."
+            placeholder="Search RequestLab..."
             class="nav-search-input"
           />
           <button
@@ -67,11 +40,38 @@
             <v-icon size="12">mdi-close</v-icon>
           </button>
         </div>
+      </div>
 
-        <!-- Vertical Divider -->
-        <div class="nav-divider d-none d-lg-block mx-2"></div>
+      <!-- Right: Navigation Links & Controls -->
+      <div class="right-controls-group d-flex align-center flex-shrink-0">
+        <!-- Navigation Tool Tabs -->
+        <div class="nav-links d-none d-md-flex align-center mr-2">
+          <button
+            type="button"
+            :class="['nav-link-item', { active: store.activeView === 'workspace' }]"
+            @click="store.activeView = 'workspace'"
+          >
+            Workspace
+          </button>
+          <button
+            type="button"
+            :class="['nav-link-item', { active: store.activeView === 'dashboard' }]"
+            @click="store.activeView = 'dashboard'"
+          >
+            Dashboard
+          </button>
+          <button
+            type="button"
+            :class="['nav-link-item', { active: store.activeView === 'history' }]"
+            @click="handleHistoryClick"
+          >
+            History
+          </button>
+        </div>
 
-        <!-- Relocated Sidebar Toggle Button -->
+        <div class="nav-divider d-none d-md-block mr-2"></div>
+
+        <!-- Sidebar Toggle Button -->
         <button
           type="button"
           class="nav-icon-btn"
@@ -79,23 +79,13 @@
           :title="sidebarOpen ? 'Hide Collections Sidebar (Ctrl+B)' : 'Show Collections Sidebar (Ctrl+B)'"
           @click="emit('toggle-sidebar')"
         >
-          <v-icon size="18">{{ sidebarOpen ? 'mdi-dock-left' : 'mdi-dock-window' }}</v-icon>
-        </button>
-
-        <!-- Theme Switcher -->
-        <button
-          type="button"
-          class="nav-icon-btn"
-          :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-          @click="handleToggleTheme"
-        >
-          <v-icon size="17">{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
+          <v-icon size="16">{{ sidebarOpen ? 'mdi-dock-left' : 'mdi-dock-window' }}</v-icon>
         </button>
 
         <!-- Guest Indicator Pill -->
         <div
           v-if="!isAuthenticated"
-          class="guest-status-tag d-none d-md-flex align-center px-3 py-1 rounded cursor-pointer ml-1"
+          class="guest-status-tag d-none d-lg-flex align-center px-3 py-1 rounded cursor-pointer"
           title="Guest Mode: Free instant testing. Sign in to save collections."
           @click="emit('open-auth', 'Sign in to save your requests and view history across sessions.')"
         >
@@ -104,11 +94,11 @@
         </div>
 
         <!-- Authenticated User Menu -->
-        <div v-if="isAuthenticated" class="d-flex align-center ml-1">
+        <div v-if="isAuthenticated" class="d-flex align-center">
           <v-menu location="bottom end">
             <template #activator="{ props }">
-              <button v-bind="props" type="button" class="user-btn d-flex align-center px-2.5 py-1 rounded">
-                <span class="user-avatar mr-2">{{ userInitial }}</span>
+              <button v-bind="props" type="button" class="user-btn d-flex align-center px-2 py-1 rounded">
+                <span class="user-avatar mr-1.5">{{ userInitial }}</span>
                 <span class="text-caption font-weight-medium text-truncate mr-1" style="max-width: 120px;">
                   {{ store.user?.email }}
                 </span>
@@ -144,11 +134,11 @@
           </v-menu>
         </div>
 
-        <!-- Sign In Button for Guests -->
+        <!-- Sign In Button for Guests (Postman Style Accent) -->
         <button
           v-else
           type="button"
-          class="signin-btn font-weight-bold rounded ml-1"
+          class="signin-btn font-weight-bold rounded"
           @click="emit('open-auth', 'Sign in to save requests into personal collections.')"
         >
           Sign In
@@ -160,9 +150,8 @@
 
 <script setup>
 import { computed, defineProps, defineEmits } from "vue";
-import { useTheme } from "vuetify";
 import RequestLabLogo from "@/components/RequestLabLogo.vue";
-import { store, isAuthenticated, logout, showToast } from "@/stores/appState";
+import { store, isAuthenticated, logout } from "@/stores/appState";
 
 defineProps({
   sidebarOpen: { type: Boolean, default: true },
@@ -170,22 +159,10 @@ defineProps({
 
 const emit = defineEmits(["toggle-sidebar", "open-auth"]);
 
-const theme = useTheme();
-const isDark = computed(() => theme.global.current.value.dark);
-
 const userInitial = computed(() => {
   if (!store.user?.email) return "U";
   return store.user.email.charAt(0).toUpperCase();
 });
-
-function handleToggleTheme() {
-  const next = isDark.value ? "light" : "dark";
-  theme.global.name.value = next;
-  store.theme = next;
-  localStorage.setItem("api_sentinel_theme", next);
-  document.documentElement.setAttribute("data-theme", next);
-  showToast(`Switched to ${next === "dark" ? "Dark" : "Light"} mode`, "info");
-}
 
 function handleHistoryClick() {
   if (!isAuthenticated.value) {
@@ -285,16 +262,18 @@ function handleHistoryClick() {
 }
 
 .nav-search-wrap {
-  background: var(--bg-input);
+  background: var(--bg-surface-elevated);
   border: 1px solid var(--border-color);
-  border-radius: 5px;
-  height: 32px;
-  width: 210px;
-  transition: border-color 0.15s ease;
+  border-radius: 20px;
+  height: 30px;
+  width: 320px;
+  max-width: 100%;
+  transition: all 0.15s ease;
 }
 
 .nav-search-wrap:focus-within {
   border-color: var(--primary);
+  background: var(--bg-surface);
 }
 
 .nav-search-input {
@@ -371,12 +350,13 @@ function handleHistoryClick() {
 
 .signin-btn {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--primary-fg, #042416);
+  font-weight: 700;
   border: none;
-  height: 34px;
-  padding: 0 18px;
-  border-radius: 6px;
-  font-size: 0.82rem;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 5px;
+  font-size: 0.8rem;
   letter-spacing: 0.01em;
   cursor: pointer;
   transition: background 0.15s ease;

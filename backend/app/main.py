@@ -1,12 +1,22 @@
-"""Main application entry point for API Sentinel.
+"""Main application entry point for RequestLab.
 
-Initializes FastAPI, sets up middleware (CORS), and mounts routers.
+Initializes FastAPI, sets up middleware (CORS), mounts routers, and manages lifespans.
 """
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.router import api_router
+from app.services.http_executor import http_executor
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan context for resource setup and teardown."""
+    yield
+    # Clean up persistent HTTP client connections on server shutdown
+    await http_executor.close_client()
 
 
 def create_application() -> FastAPI:
@@ -18,6 +28,7 @@ def create_application() -> FastAPI:
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
     )
 
     # CORS (Cross-Origin Resource Sharing) middleware
@@ -47,4 +58,3 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-

@@ -121,8 +121,8 @@
     <div class="recent-section rounded border">
       <div class="section-top px-3 py-2.5 d-flex align-center justify-space-between border-b flex-wrap gap-2">
         <div class="d-flex align-center gap-2">
-          <v-icon size="16" class="text-secondary">mdi-clock-outline</v-icon>
-          <span class="font-weight-bold text-caption">Recent Execution Traces</span>
+          <v-icon size="16" class="text-muted">mdi-clock-outline</v-icon>
+          <span class="font-weight-bold text-caption text-primary">Recent Execution Traces</span>
         </div>
         <button
           v-if="isAuthenticated && store.history.length > 0"
@@ -194,9 +194,9 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center pa-6 text-secondary">
+      <div v-else class="text-center pa-6">
         <v-icon size="28" color="grey" class="mb-2">mdi-history</v-icon>
-        <div class="text-caption font-weight-bold mb-1">
+        <div class="text-caption font-weight-bold text-primary mb-1">
           No execution traces recorded
         </div>
         <div class="text-caption text-muted mb-3" style="max-width: 360px; margin: 0 auto;">
@@ -322,7 +322,8 @@ function formatDate(isoStr) {
 /* Developer Buttons */
 .dev-primary-btn {
   background: var(--primary);
-  color: #ffffff;
+  color: var(--primary-fg, #ffffff);
+  font-weight: 700;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -373,6 +374,7 @@ function formatDate(isoStr) {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
+  color: var(--text-muted);
 }
 
 .metric-value {
@@ -383,6 +385,7 @@ function formatDate(isoStr) {
 
 .metric-subtext {
   font-size: 11px;
+  color: var(--text-secondary);
 }
 
 /* Recent Executions Box */
